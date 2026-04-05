@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { authAPI } from '@/lib/api';
 
-export default function AuthCallback() {
+function AuthCallbackContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -43,3 +43,17 @@ export default function AuthCallback() {
         </div>
     );
 }
+
+export default function AuthCallback() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center">
+                <Spinner size="lg" />
+            </div>
+        }>
+            <AuthCallbackContent />
+        </Suspense>
+    );
+}
+
+import { Spinner } from '@heroui/spinner';
