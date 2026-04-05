@@ -26,8 +26,12 @@ connectDB();
 configurePassport();
 
 // Middleware
+const frontendUrl = process.env.FRONTEND_URL || 'https://smart-form-builder-ten.vercel.app';
+// Normalize: remove trailing slash if present
+const allowedOrigin = frontendUrl.endsWith('/') ? frontendUrl.slice(0, -1) : frontendUrl;
+
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'https://smart-form-builder-ten.vercel.app/',
+    origin: allowedOrigin,
     credentials: true,
 }));
 
