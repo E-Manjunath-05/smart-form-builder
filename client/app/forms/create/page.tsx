@@ -241,6 +241,7 @@ export default function CreateFormPage() {
                             <Input
                                 type="datetime-local"
                                 label="Deadline (Optional)"
+                                placeholder="Select deadline"
                                 value={formData.deadline}
                                 onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
                                 size="lg"
