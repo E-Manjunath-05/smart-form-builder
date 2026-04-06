@@ -64,7 +64,6 @@ export default function RegisterPage() {
                             <Input
                                 type="text"
                                 label="Full Name"
-                                placeholder="John Doe"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 required
@@ -75,7 +74,6 @@ export default function RegisterPage() {
                             <Input
                                 type="email"
                                 label="Email"
-                                placeholder="your.email@example.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
@@ -86,7 +84,6 @@ export default function RegisterPage() {
                             <Input
                                 type="password"
                                 label="Password"
-                                placeholder="At least 6 characters"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required

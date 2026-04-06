@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@heroui/button';
-import { Input } from '@heroui/input';
+import { Input, Textarea } from '@heroui/input';
 import { Card, CardBody, CardHeader } from '@heroui/card';
 import { Select, SelectItem } from '@heroui/select';
 import { Spinner } from '@heroui/spinner';
@@ -34,6 +34,7 @@ export default function EditFormPage() {
     const [saving, setSaving] = useState(false);
     const [publishing, setPublishing] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
+    const [expandedQuestions, setExpandedQuestions] = useState<string[]>([]);
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -42,6 +43,14 @@ export default function EditFormPage() {
         isPublished: false,
         shareLink: '',
     });
+
+    const toggleQuestion = (id: string) => {
+        if (expandedQuestions.includes(id)) {
+            setExpandedQuestions(expandedQuestions.filter((qId) => qId !== id));
+        } else {
+            setExpandedQuestions([...expandedQuestions, id]);
+        }
+    };
 
     useEffect(() => {
         if (formId) {
@@ -68,12 +77,13 @@ export default function EditFormPage() {
     };
 
     const addQuestion = () => {
+        const newId = `q_${Date.now()}`;
         setFormData({
             ...formData,
             questions: [
                 ...formData.questions,
                 {
-                    questionId: `q_${Date.now()}`,
+                    questionId: newId,
                     type: 'text',
                     label: '',
                     placeholder: '',
@@ -83,6 +93,7 @@ export default function EditFormPage() {
                 },
             ],
         });
+        setExpandedQuestions([...expandedQuestions, newId]);
     };
 
     const removeQuestion = (index) => {
@@ -233,143 +244,180 @@ export default function EditFormPage() {
                     <CardBody className="p-8 space-y-5">
                         <Input
                             label="Form Title"
-                            placeholder="Enter form title"
+                            placeholder="Enter your form title"
                             value={formData.title}
                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                             required
                             size="lg"
                             variant="bordered"
-                            classNames={{ inputWrapper: 'border-gray-200 dark:border-gray-700 hover:border-indigo-400 transition-colors' }}
+                            labelPlacement="outside"
+                            classNames={{ inputWrapper: 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 hover:border-indigo-400 transition-colors mt-2 h-14' }}
                         />
-                        <Input
+                        <Textarea
                             label="Description (Optional)"
-                            placeholder="Enter form description"
+                            placeholder="What is this form about?"
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            size="lg"
+                            minRows={3}
                             variant="bordered"
-                            classNames={{ inputWrapper: 'border-gray-200 dark:border-gray-700 hover:border-indigo-400 transition-colors' }}
+                            labelPlacement="outside"
+                            classNames={{ inputWrapper: 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 hover:border-indigo-400 transition-colors mt-2' }}
                         />
                         <Input
                             type="datetime-local"
                             label="Deadline (Optional)"
-                            placeholder="Select a deadline"
                             value={formData.deadline}
                             onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
                             size="lg"
                             variant="bordered"
-                            classNames={{ inputWrapper: 'border-gray-200 dark:border-gray-700 hover:border-indigo-400 transition-colors' }}
+                            labelPlacement="outside"
+                            classNames={{ inputWrapper: 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 hover:border-indigo-400 transition-colors mt-2 h-14' }}
                         />
                     </CardBody>
                 </Card>
 
                 {/* Questions */}
                 <div className="space-y-4 mb-6">
-                    {formData.questions.map((question, qIndex) => (
-                        <Card key={question.questionId} className="premium-card rounded-2xl overflow-hidden animate-fadeInUp" style={{ animationDelay: `${qIndex * 0.05}s` }}>
-                            <div className="h-0.5 bg-gradient-to-r from-indigo-400/50 to-purple-400/50" />
-                            <CardBody className="p-6 space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-sm font-bold text-indigo-600 dark:text-indigo-400">
+                    {formData.questions.map((question, qIndex) => {
+                        const isExpanded = expandedQuestions.includes(question.questionId);
+                        return (
+                            <div key={question.questionId} className="animate-fadeInUp" style={{ animationDelay: `${qIndex * 0.05}s` }}>
+                                {/* Collapsible Header */}
+                                <div 
+                                    className="flex items-center justify-between p-4 mb-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-md border hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors border-gray-200 dark:border-gray-700/50 rounded-2xl cursor-pointer shadow-sm group"
+                                    onClick={() => toggleQuestion(question.questionId)}
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold transition-colors ${isExpanded ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-200 dark:group-hover:bg-indigo-900/60'}`}>
                                             {qIndex + 1}
                                         </div>
-                                        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200">Question {qIndex + 1}</h3>
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                                {question.label || 'New Question'}
+                                            </h3>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{question.type} • {question.required ? 'Required' : 'Optional'}</p>
+                                        </div>
                                     </div>
-                                    <Button
-                                        size="sm"
-                                        variant="flat"
-                                        className="bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
-                                        isIconOnly
-                                        onPress={() => removeQuestion(qIndex)}
-                                    >
-                                        <TrashIcon className="w-5 h-5" />
-                                    </Button>
-                                </div>
-
-                                <div className="grid md:grid-cols-2 gap-4">
-                                    <Select
-                                        label="Question Type"
-                                        selectedKeys={[question.type]}
-                                        onChange={(e) => updateQuestion(qIndex, 'type', e.target.value)}
-                                        variant="bordered"
-                                        classNames={{ trigger: 'border-gray-200 dark:border-gray-700 hover:border-indigo-400 transition-colors' }}
-                                    >
-                                        {questionTypes.map((type) => (
-                                            <SelectItem key={type.value} value={type.value}>
-                                                {type.label}
-                                            </SelectItem>
-                                        ))}
-                                    </Select>
-
-                                    <div className="flex items-center gap-3">
-                                        <input
-                                            type="checkbox"
-                                            checked={question.required}
-                                            onChange={(e) => updateQuestion(qIndex, 'required', e.target.checked)}
-                                            className="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                        />
-                                        <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Required</label>
-                                    </div>
-                                </div>
-
-                                <Input
-                                    label="Question Label"
-                                    placeholder="Enter question text"
-                                    value={question.label}
-                                    onChange={(e) => updateQuestion(qIndex, 'label', e.target.value)}
-                                    required
-                                    variant="bordered"
-                                    classNames={{ inputWrapper: 'border-gray-200 dark:border-gray-700 hover:border-indigo-400 transition-colors' }}
-                                />
-
-                                <Input
-                                    label="Placeholder (Optional)"
-                                    placeholder="Enter placeholder text"
-                                    value={question.placeholder}
-                                    onChange={(e) => updateQuestion(qIndex, 'placeholder', e.target.value)}
-                                    variant="bordered"
-                                    classNames={{ inputWrapper: 'border-gray-200 dark:border-gray-700 hover:border-indigo-400 transition-colors' }}
-                                />
-
-                                {needsOptions(question.type) && (
-                                    <div className="space-y-3 p-4 rounded-xl bg-gray-50/50 dark:bg-gray-800/30 border border-gray-100 dark:border-gray-700/50">
-                                        <label className="text-sm font-semibold text-gray-600 dark:text-gray-400">Options</label>
-                                        {question.options?.map((option, oIndex) => (
-                                            <div key={`${question.questionId}-option-${oIndex}`} className="flex gap-2">
-                                                <Input
-                                                    placeholder={`Option ${oIndex + 1}`}
-                                                    value={option.label}
-                                                    onChange={(e) => updateOption(qIndex, oIndex, e.target.value)}
-                                                    className="flex-1"
-                                                    variant="bordered"
-                                                    classNames={{ inputWrapper: 'border-gray-200 dark:border-gray-700 hover:border-indigo-400 transition-colors' }}
-                                                />
-                                                <Button
-                                                    size="sm"
-                                                    variant="flat"
-                                                    className="bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-100 transition-colors"
-                                                    isIconOnly
-                                                    onPress={() => removeOption(qIndex, oIndex)}
-                                                >
-                                                    <TrashIcon className="w-4 h-4" />
-                                                </Button>
-                                            </div>
-                                        ))}
+                                    <div className="flex items-center gap-2">
                                         <Button
                                             size="sm"
-                                            variant="bordered"
-                                            className="border-dashed border-gray-300 dark:border-gray-600 hover:border-indigo-400 transition-colors"
-                                            onPress={() => addOption(qIndex)}
-                                            startContent={<PlusIcon className="w-4 h-4" />}
+                                            variant="flat"
+                                            color="danger"
+                                            className="opacity-0 group-hover:opacity-100 transition-opacity bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40"
+                                            isIconOnly
+                                            onPress={(e) => {
+                                                e.stopPropagation();
+                                                removeQuestion(qIndex);
+                                            }}
                                         >
-                                            Add Option
+                                            <TrashIcon className="w-4 h-4" />
                                         </Button>
+                                        <div className="text-gray-400 dark:text-gray-500 px-2 transition-transform duration-300" style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                                            ▼
+                                        </div>
                                     </div>
+                                </div>
+
+                                {/* Expanded Container */}
+                                {isExpanded && (
+                                    <Card className="premium-card rounded-2xl mb-6 ml-4 border-l-4 border-l-indigo-500 border border-gray-100 dark:border-gray-800/60 shadow-lg overflow-visible animate-fadeIn">
+                                        <CardBody className="p-6 space-y-6">
+                                            <div className="grid md:grid-cols-2 gap-5 place-items-start">
+                                                <Select
+                                                    label="Question Type"
+                                                    selectedKeys={[question.type]}
+                                                    onChange={(e) => updateQuestion(qIndex, 'type', e.target.value)}
+                                                    variant="bordered"
+                                                    classNames={{ trigger: 'border-gray-200 dark:border-gray-700 hover:border-indigo-400 transition-colors w-full' }}
+                                                >
+                                                    {questionTypes.map((type) => (
+                                                        <SelectItem key={type.value} value={type.value}>
+                                                            {type.label}
+                                                        </SelectItem>
+                                                    ))}
+                                                </Select>
+
+                                                <div className="flex items-center gap-3 pt-2 pl-2">
+                                                    <input
+                                                        type="checkbox"
+                                                        id={`required-${question.questionId}`}
+                                                        checked={question.required}
+                                                        onChange={(e) => updateQuestion(qIndex, 'required', e.target.checked)}
+                                                        className="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                                    />
+                                                    <label htmlFor={`required-${question.questionId}`} className="text-sm font-semibold text-gray-700 dark:text-gray-300 cursor-pointer select-none border border-transparent hover:border-gray-200 dark:hover:border-gray-700 p-1.5 rounded-lg transition-colors">
+                                                        Required Field
+                                                    </label>
+                                                </div>
+                                            </div>
+
+                                            <Input
+                                                label="Question Label"
+                                                value={question.label}
+                                                onChange={(e) => updateQuestion(qIndex, 'label', e.target.value)}
+                                                required
+                                                variant="bordered"
+                                                size="lg"
+                                                classNames={{ inputWrapper: 'border-indigo-100 dark:border-indigo-900/30 hover:border-indigo-400 transition-colors focus-within:!border-indigo-500 bg-indigo-50/10 dark:bg-indigo-900/10' }}
+                                            />
+
+                                            <Input
+                                                label="Placeholder (Optional)"
+                                                value={question.placeholder}
+                                                onChange={(e) => updateQuestion(qIndex, 'placeholder', e.target.value)}
+                                                variant="bordered"
+                                                classNames={{ inputWrapper: 'border-gray-200 dark:border-gray-700 hover:border-indigo-400 transition-colors' }}
+                                            />
+
+                                            {/* Options for radio, checkbox, select */}
+                                            {needsOptions(question.type) && (
+                                                <div className="p-5 rounded-xl bg-gray-50/60 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-700/60 shadow-inner">
+                                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                                                        Options
+                                                    </label>
+                                                    <div className="space-y-3">
+                                                        {question.options?.map((option, oIndex) => (
+                                                            <div key={`${question.questionId}-option-${oIndex}`} className="flex gap-2 items-center animate-fadeIn group/option">
+                                                                <div className="text-gray-400 w-4 text-center text-xs font-bold">{oIndex + 1}.</div>
+                                                                <Input
+                                                                    placeholder={`Enter option ${oIndex + 1}`}
+                                                                    value={option.label}
+                                                                    onChange={(e) => updateOption(qIndex, oIndex, e.target.value)}
+                                                                    className="flex-1"
+                                                                    variant="faded"
+                                                                    classNames={{ inputWrapper: 'border-transparent hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors bg-white dark:bg-gray-900/50 shadow-sm' }}
+                                                                />
+                                                                <Button
+                                                                    size="sm"
+                                                                    isIconOnly
+                                                                    variant="ghost"
+                                                                    color="danger"
+                                                                    className="opacity-20 group-hover/option:opacity-100 transition-opacity"
+                                                                    onPress={() => removeOption(qIndex, oIndex)}
+                                                                >
+                                                                    <TrashIcon className="w-4 h-4" />
+                                                                </Button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="flat"
+                                                        className="w-full mt-4 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 font-semibold border border-indigo-100 dark:border-indigo-800 border-dashed hover:border-indigo-400 hover:bg-indigo-100 transition-all cursor-pointer"
+                                                        onPress={() => addOption(qIndex)}
+                                                        startContent={<PlusIcon className="w-4 h-4" />}
+                                                    >
+                                                        Add New Option
+                                                    </Button>
+                                                </div>
+                                            )}
+                                        </CardBody>
+                                    </Card>
                                 )}
-                            </CardBody>
-                        </Card>
-                    ))}
+                            </div>
+                        );
+                    })}
                 </div>
 
                 <div className="flex gap-4 mb-6">
