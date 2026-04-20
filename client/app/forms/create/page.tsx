@@ -189,24 +189,24 @@ export default function CreateFormPage() {
                         <p className="text-sm text-gray-500 dark:text-gray-400">Describe your form and let AI create it for you</p>
                     </CardHeader>
                     <CardBody className="px-8 pb-7">
-                        <div className="flex gap-4">
-                            <Input
-                                placeholder="E.g., Create a customer feedback form with name, email, rating, and comments"
+                        <div className="flex flex-col gap-4">
+                            <Textarea
+                                placeholder={`Paste your form structure here. Example:\n\nStudent Registration Form\nStudent Details\nName\nAge\nGender\nAddress\n\nAcademic Information\nGrade/Class\nPrevious School\nSubjects Opted`}
                                 value={aiDescription}
                                 onChange={(e) => setAiDescription(e.target.value)}
-                                className="flex-1"
-                                size="lg"
+                                minRows={4}
+                                maxRows={10}
                                 variant="bordered"
                                 classNames={{ inputWrapper: 'border-gray-200 dark:border-gray-700 hover:border-indigo-400 transition-colors' }}
                             />
                             <Button
                                 size="lg"
-                                className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+                                className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 self-end px-8"
                                 onPress={handleAIGenerate}
                                 isLoading={aiLoading}
                                 startContent={!aiLoading && <SparklesIcon className="w-5 h-5" />}
                             >
-                                Generate
+                                Generate Form
                             </Button>
                         </div>
                     </CardBody>
@@ -255,11 +255,36 @@ export default function CreateFormPage() {
                     {/* Questions */}
                     <div className="space-y-4 mb-6">
                         {formData.questions.map((question, qIndex) => {
+                            // Render section headers as visual dividers
+                            if (question.type === 'section') {
+                                return (
+                                    <div key={question.questionId} className="animate-fadeInUp flex items-center gap-4 py-2" style={{ animationDelay: `${qIndex * 0.05}s` }}>
+                                        <div className="flex-1 h-px bg-gradient-to-r from-indigo-400/60 to-transparent" />
+                                        <div className="flex items-center gap-2">
+                                            <span className="px-4 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700/50 text-indigo-700 dark:text-indigo-300 text-sm font-bold tracking-wide">
+                                                {question.label}
+                                            </span>
+                                            <Button
+                                                size="sm"
+                                                isIconOnly
+                                                variant="light"
+                                                color="danger"
+                                                className="text-red-400 opacity-50 hover:opacity-100"
+                                                onPress={() => removeQuestion(qIndex)}
+                                            >
+                                                <TrashIcon className="w-3.5 h-3.5" />
+                                            </Button>
+                                        </div>
+                                        <div className="flex-1 h-px bg-gradient-to-l from-indigo-400/60 to-transparent" />
+                                    </div>
+                                );
+                            }
+
                             const isExpanded = expandedQuestions.includes(question.questionId);
                             return (
                                 <div key={question.questionId} className="animate-fadeInUp" style={{ animationDelay: `${qIndex * 0.05}s` }}>
                                     {/* Collapsible Header */}
-                                    <div 
+                                    <div
                                         className="flex items-center justify-between p-4 mb-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-md border hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors border-gray-200 dark:border-gray-700/50 rounded-2xl cursor-pointer shadow-sm group"
                                         onClick={() => toggleQuestion(question.questionId)}
                                     >
@@ -281,7 +306,7 @@ export default function CreateFormPage() {
                                                 color="danger"
                                                 className="opacity-0 group-hover:opacity-100 transition-opacity bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40"
                                                 isIconOnly
-                                                onPress={(e) => {
+                                                onClick={(e) => {
                                                     e.stopPropagation();
                                                     removeQuestion(qIndex);
                                                 }}

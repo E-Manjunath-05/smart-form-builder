@@ -11,8 +11,8 @@ export const generateForm = async (req, res) => {
             return res.status(400).json({ message: 'Description is required' });
         }
 
-        if (description.length > 500) {
-            return res.status(400).json({ message: 'Description is too long (max 500 characters)' });
+        if (description.length > 2000) {
+            return res.status(400).json({ message: 'Description is too long (max 2000 characters)' });
         }
 
         const generatedForm = await generateFormFromDescription(description);

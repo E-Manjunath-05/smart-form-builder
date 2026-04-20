@@ -306,7 +306,7 @@ export default function EditFormPage() {
                                             color="danger"
                                             className="opacity-0 group-hover:opacity-100 transition-opacity bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40"
                                             isIconOnly
-                                            onPress={(e) => {
+                                            onClick={(e) => {
                                                 e.stopPropagation();
                                                 removeQuestion(qIndex);
                                             }}

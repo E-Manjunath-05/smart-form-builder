@@ -10,7 +10,7 @@ const questionSchema = new mongoose.Schema({
     type: {
         type: String,
         required: true,
-        enum: ['text', 'email', 'tel', 'number', 'textarea', 'radio', 'checkbox', 'select', 'date'],
+        enum: ['text', 'email', 'tel', 'number', 'textarea', 'radio', 'checkbox', 'select', 'date', 'section'],
     },
     label: {
         type: String,
